@@ -71,18 +71,18 @@ func TestMallocs(t *testing.T) {
 	key := testKey(t)
 	cards := testCards(t, 100)
 
-	crypter := New()
+	crypter := New(WithWorkers(1))
 	mallocs := inspectMallocs(t, func() {
 		crypter.Encrypt(cards, key)
 	})
 
 	// try to optimize []byte <-> string conversion
 	// unsafe.Slice(), unsafe.SliceData(), unsafe.String(), unsafe.StringData()
-	require.LessOrEqual(t, mallocs/len(cards), 3)
+	// also try to check hex implementation
+
+	require.LessOrEqual(t, mallocs/len(cards), 2) // ~2 + eps
 }
 
-// TestWorkersDistribution
-// forall workers w1,w2, |task(w1) - task(w2)| <= 1
 func TestWorkersDistribution(t *testing.T) {
 	mockReaderWithTimeout(t, time.Second)
 

@@ -4,6 +4,10 @@ package cardcrypter
 
 import (
 	"crypto/aes"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"testing"
@@ -128,7 +132,14 @@ func TestEncryptWorkersFallback(t *testing.T) {
 	key := testKey(t)
 	cards := testCards(t, 10_000)
 
-	workers := runtime.GOMAXPROCS(-1)
+	prev := runtime.GOMAXPROCS(-1)
+	t.Cleanup(func() {
+		runtime.GOMAXPROCS(prev)
+	})
+
+	const workers = 123
+	runtime.GOMAXPROCS(workers)
+
 	crypter := New()
 	gNum := inspectNumGoroutines(t, func() {
 		ct, err := crypter.Encrypt(cards, key)
@@ -187,4 +198,28 @@ func TestWait(t *testing.T) {
 	})
 }
 
-//mockReaderWithError(t)
+func TestNoChannels(t *testing.T) {
+	filesToCheck := []string{
+		"./encrypt.go",
+	}
+
+	for _, relPath := range filesToCheck {
+		absPath, err := filepath.Abs(relPath)
+		require.NoError(t, err)
+
+		fset := token.NewFileSet()
+		node, err := parser.ParseFile(fset, absPath, nil, parser.AllErrors)
+		require.NoError(t, err)
+
+		ast.Inspect(node, func(n ast.Node) bool {
+			if makeExpr, ok := n.(*ast.CallExpr); ok {
+				if ident, ok := makeExpr.Fun.(*ast.Ident); ok && ident.Name == "make" {
+					_, ok = makeExpr.Args[0].(*ast.ChanType)
+					require.False(t, ok, "сhannels are prohibited in this assignment.")
+				}
+			}
+
+			return true
+		})
+	}
+}
