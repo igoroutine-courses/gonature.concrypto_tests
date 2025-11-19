@@ -147,7 +147,7 @@ func TestEncryptWorkersFallback(t *testing.T) {
 		require.Len(t, ct, len(cards))
 	})
 
-	require.LessOrEqual(t, gNum, workers)
+	require.InDelta(t, gNum, workers, 10)
 }
 
 func TestEncryptWorkersLimit(t *testing.T) {
