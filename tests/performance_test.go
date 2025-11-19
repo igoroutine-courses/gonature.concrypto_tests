@@ -78,9 +78,11 @@ func TestMallocs(t *testing.T) {
 
 	// try to optimize []byte <-> string conversion
 	// unsafe.Slice(), unsafe.SliceData(), unsafe.String(), unsafe.StringData()
-	// also try to check hex implementation
 
-	require.LessOrEqual(t, mallocs/len(cards), 2) // ~2 + eps
+	// Also try to check hex implementation.
+	// Think about local variables too.
+
+	require.LessOrEqual(t, mallocs/len(cards), 1) // ~1 + eps
 }
 
 func TestWorkersDistribution(t *testing.T) {
