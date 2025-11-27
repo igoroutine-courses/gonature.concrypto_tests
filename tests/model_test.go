@@ -129,6 +129,8 @@ func TestEncryptWorkers(t *testing.T) {
 }
 
 func TestEncryptWorkersFallback(t *testing.T) {
+	mockReaderWithTimeout(t, time.Millisecond*50)
+
 	key := testKey(t)
 	cards := testCards(t, 10_000)
 
