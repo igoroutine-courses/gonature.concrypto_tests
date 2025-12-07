@@ -173,16 +173,21 @@ func TestGolden(t *testing.T) {
 	cards := []Card{
 		{ID: "card-1", Number: CardNumber{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6'}},
 		{ID: "card-2", Number: CardNumber{'4', '2', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}},
+		{ID: "card-3", Number: CardNumber{'4', '2', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '0', '0', '0', '0'}},
+		{ID: "card-4", Number: CardNumber{'4', '2', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '2', '0', '0', '0'}},
+		{ID: "card-5", Number: CardNumber{'4', '2', '0', '0', '0', '0', '5', '0', '0', '0', '0', '1', '0', '0', '0', '0'}},
 	}
 
-	crypter := New()
+	crypter := New(WithWorkers(1))
 	ct, err := crypter.Encrypt(cards, key)
 	require.NoError(t, err)
 	require.Len(t, ct, len(cards))
 
-	slices.Sort(ct)
 	require.Equal(t, "313131313131313131313131d382eb39f26d725f4616694b2a0fde33cbc718eaf7b4f2d2817e4ce16e4cacd5", ct[0])
 	require.Equal(t, "313131313131313131313131d682e83df76b75574f166849290bdb3590ee92ef27190a828d801187d567faed", ct[1])
+	require.Equal(t, "313131313131313131313131d682e83df76b70574f166849290bdb35a1ad9f44365cd59b63388cd51ac251f4", ct[2])
+	require.Equal(t, "313131313131313131313131d682e83df76b70574f1668492b0bdb35644ab44907991805d89acb6b6ac13cce", ct[3])
+	require.Equal(t, "313131313131313131313131d682e83df76b70574f166848290bdb352d075307abe59fa267bf24809045e811", ct[4])
 }
 
 func TestWait(t *testing.T) {
